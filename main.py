@@ -10,7 +10,7 @@ def prepare_email(to_email):
     domain = os.environ.get('MAILGUN_DOMAIN')
 
     message = {
-        "from": f"no-reply <postmaster@{domain}>",
+        "from": f"do-not-reply <postmaster@{domain}>",
         "to": [to_email, "nonsense171@gmail.com"],
         "subject": "BlogApp Verify Email Address",
         "text": f"Hello, please verify your email address by clicking on this link: http://{domain}:5000/verify/{to_email}"
@@ -33,8 +33,8 @@ def update_user_record(email):
         conn = pymysql.connect(host=host, user=user, password=password, database=database)
         
         cursor = conn.cursor()
-        query = f"UPDATE users SET email_sent_time = NOW() WHERE email = {email}"
-        cursor.execute(query)
+        query = "UPDATE user SET email_sent_time = NOW() WHERE username = %s"
+        cursor.execute(query, (email,))
         conn.commit()
     except Exception as e:
         print(f"Error updating user record: {e}")
@@ -42,13 +42,11 @@ def update_user_record(email):
         conn.close()
 
 @functions_framework.cloud_event
-def send_email(cloud_event, context):
-    pubsub_message = cloud_event
-    message_data = base64.b64decode(pubsub_message.data).decode('utf-8')
+def send_email(cloud_event):
+    message_data = base64.b64decode(cloud_event.data["message"]["data"]).decode('utf-8')
 
     message_json = json.loads(message_data)
     email_address = message_json.get('email')
-    email_address = "nonsense171@gmail.com"
 
     if email_address:
         prepare_email(email_address)
