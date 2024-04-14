@@ -13,7 +13,7 @@ def prepare_email(to_email):
         "from": f"do-not-reply <postmaster@{domain}>",
         "to": [to_email, "nonsense171@gmail.com"],
         "subject": "BlogApp Verify Email Address",
-        "text": f"Hello, please verify your email address by clicking on this link: http://{domain}:5000/verify/{to_email}"
+        "text": f"Hello, please verify your email address by clicking on this link: https://{domain}/verify/{to_email}"
     }
 
     response = requests.post(
